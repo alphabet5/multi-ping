@@ -26,6 +26,7 @@ import threading
 from queue import Queue #, Empty
 import subprocess
 from rich.text import Text
+import platform
 
 def get_color(value, minLatency, maxLatency):
     colors = {
@@ -448,12 +449,20 @@ def get_color(value, minLatency, maxLatency):
 
 def ping_device(host, maxLatency, interval, q):
     threading.Timer(interval=interval, function=ping_device, args=[host, maxLatency, interval, q]).start()
-    result = subprocess.run(['ping', '-c', '1', '-W', str(maxLatency), host], capture_output=True)
-    parse = re.compile(".*time=(\d*\.\d*) ms")
-    try:
-        latency = float(parse.match(str(result.stdout)).group(1))
-    except:
-        latency = '!'
+    if platform.system() != 'Windows':
+        result = subprocess.run(['ping', '-c', '1', '-W', str(maxLatency), host], capture_output=True)
+        parse = re.compile(r".*time=(\d*\.\d*) ms")
+        try:
+            latency = float(parse.search(str(result.stdout)).group(1))
+        except:
+            latency = '!'
+    else:
+        result = subprocess.run(['ping', '-n', '1', '-w', str(maxLatency), host], capture_output=True)
+        parse = re.compile(r".*Maximum = (\d*)ms")
+        try:
+            latency = float(parse.search(str(result.stdout)).group(1))
+        except:
+            latency = '!'
     q.put((host, latency))
 
 

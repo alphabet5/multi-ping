@@ -42,8 +42,24 @@ python3 setup.py bdist_wheel --universal
 python3 -m pip install dist/multi_ping-*-py2.py3-none-any.whl
 ```
 
+## Offline installation for Windows
+
+```bash
+python3.11 -m pip download --platform win_amd64 --only-binary=:all: rich
+```
+
+Copy the .whl generated with the 'Building and Installing'  step above, as well as the downloaded .whl files from the command ^ to the remote computer it their own folder. Open a command window in that folder and run the install command.
+
+Install Command
+
+```bash
+python3.11 -m pip install *.whl
+```
 
 ## Changelog
 
 ### 0.0.1
 - Initial Release
+
+### 0.0.2
+- Initial support for windows

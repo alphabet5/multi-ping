@@ -8,7 +8,7 @@ with open("VERSION", "r") as f:
 
 setuptools.setup(
     name="multi-ping",
-    version="0.0.1",
+    version=version,
     author="alphabet5",
     author_email="johnburt.jab@gmail.com",
     description="Copy credentials.",
