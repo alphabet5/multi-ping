@@ -451,7 +451,9 @@ def ping_device(host, maxLatency, interval, q):
     threading.Timer(interval=interval, function=ping_device, args=[host, maxLatency, interval, q]).start()
     if platform.system() != 'Windows':
         result = subprocess.run(['ping', '-c', '1', '-W', str(maxLatency), host], capture_output=True)
-        parse = re.compile(r".*time=(\d*\.\d*) ms")
+        parse = re.compile(r".*time=(\d+\.\d+) ms")
+        if result.stdout == b'':
+            print("Error with host " + host + " :" + result.stderr)
         try:
             latency = float(parse.search(str(result.stdout)).group(1))
         except:
@@ -504,7 +506,7 @@ def main():
     parser = argparse.ArgumentParser(description="Ping multiple hosts and display the results in a table.")
     parser.add_argument('--maxLatency',
                         help='The maximum latency for coloring and icmp timeout.',
-                        default=4000,
+                        default=1000,
                         type=int)
     parser.add_argument('--minLatency',
                         help='The minimum latency for coloring.',

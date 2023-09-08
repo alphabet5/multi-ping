@@ -7,7 +7,7 @@ with open("VERSION", "r") as f:
     version = f.read()
 
 setuptools.setup(
-    name="multi-ping",
+    name="alphabet5-ping",
     version=version,
     author="alphabet5",
     author_email="johnburt.jab@gmail.com",
@@ -21,7 +21,7 @@ setuptools.setup(
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
     ],
-    python_requires=">=3.10",
+    python_requires=">=3",
     entry_points={"console_scripts": ["png=ping.ping:main"]},
     include_package_data=True,
     package_data={

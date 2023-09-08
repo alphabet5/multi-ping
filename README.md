@@ -36,12 +36,19 @@ options:
 
 ![](README_images/2022-11-22-09-41-22.png)
 
+## Installing from pypi
+
+```bash
+python3 -m pip install alphabet5-ping
+```
+
 ## Building and Installing
 
 ```
-python3 -m pip uninstall multi-ping -y
+python3 -m pip install wheel -y
+python3 -m pip uninstall alphabet5-ping -y
 python3 setup.py bdist_wheel --universal
-python3 -m pip install dist/multi_ping-*-py2.py3-none-any.whl
+python3 -m pip install dist/alphabet5_ping-*-py2.py3-none-any.whl
 ```
 
 ## Offline installation for Windows
