@@ -5,7 +5,8 @@ This is a simple script to make pinging and viewing the status of pinging multip
 ## Usage
 
 ```
-usage: png [-h] [--maxLatency MAXLATENCY] [--minLatency MINLATENCY] [--interval INTERVAL] ...
+usage: png [-h] [--maxLatency MAXLATENCY] [--minLatency MINLATENCY] [--interval INTERVAL] [--domain DOMAIN]
+           ...
 
 Ping multiple hosts and display the results in a table.
 
@@ -19,6 +20,7 @@ options:
   --minLatency MINLATENCY
                         The minimum latency for coloring.
   --interval INTERVAL   The interval to ping the devices.
+  --domain DOMAIN       Append domain if the host doesn't resolve. Default=[] or PNG_APPEND_DOMAINS
 ```
 
 ## Example
@@ -35,6 +37,9 @@ options:
 ```
 
 ![](README_images/2022-11-22-09-41-22.png)
+
+
+You can include comment lines by starting the host with a `/`.
 
 ## Installing from pypi
 
@@ -72,3 +77,11 @@ python3.11 -m pip install *.whl
 
 ### 0.0.2
 - Initial support for windows
+
+### 0.0.5
+
+This update simplifies quite a few things. Instead of brute-forcing the colors, some logic was added.
+
+The queue setup was replaced with a ThreadPoolExecutor that seems to work just as well. This also better supports error handling, and just gets the IP addresses once per startup and pings by ip instead of by hostname. This also allows for appending custom domains to the hostnames either via environment variable, or by adding --domain example.local, each domain will be tried in order, and the first to resolve will be used (including no domain.)
+
+This also fixes some setup info.
