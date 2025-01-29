@@ -30,10 +30,10 @@ import socket
 import os
 import sys
 import ipaddress
-from textual.app import App, ComposeResult
-from textual.widgets import DataTable
-from textual.containers import Container
-import asyncio
+# from textual.app import App, ComposeResult
+# from textual.widgets import DataTable
+# from textual.containers import Container
+# import asyncio
 
 
 def get_color(value, minLatency, maxLatency):
@@ -62,7 +62,7 @@ def ping_device(name, host, maxLatency, interval, ping_width):
     try:
         ipaddress.ip_address(host)
     except:
-        return name, "!", f"Invalid IP address, {host}"
+        return name, "!", f"{host}"
     if platform.system() != "Windows":
         result = subprocess.run(
             ["ping", "-c", "1", "-W", str(maxLatency), host], capture_output=True
@@ -90,17 +90,23 @@ def generate_table(minLatency, maxLatency, name_width, ping_width) -> Table:
     global hosts
     table = Table()
     table.add_column("Hostname/IP", width=name_width)
-    table.add_column("Ping Status", justify="right", width=ping_width+2, no_wrap=True)
-    table.add_column("Error")
+    table.add_column("Ping Status", justify="center", min_width=ping_width+2, no_wrap=True)
+    table.add_column("S", justify="left", min_width=2, no_wrap=True)
+    table.add_column("Error", no_wrap=True)
 
     for name, h in hosts.items():
+        if name[:1] != "/":
+            status = "🟥"
+        else:
+            status = ""
         text = Text()
         for ping in h["pings"]:
             if ping != "!":
                 text.append("|", style=get_color(ping, minLatency, maxLatency))
+                status = "🟩"
             else:
                 text.append("!", style="rgb(255,51,51)")
-        table.add_row(name, text[-ping_width:], h["error"])
+        table.add_row(name, text[-ping_width:], status, h["error"])
     return table
 
 
@@ -179,7 +185,7 @@ def main():
     active_futures = list()
     exe = ThreadPoolExecutor(max_workers=50)
     last_refresh = 0
-    with Live(table, refresh_per_second=0.0001, screen=True) as live:
+    with Live(table, refresh_per_second=0.1, screen=True) as live:
         while True:
             for host, h in hosts.items():
                 if (

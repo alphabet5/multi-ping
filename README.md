@@ -89,3 +89,11 @@ This also fixes some setup info.
 ### 0.0.6
 
 Set screen=True and update the refresh interval, to reduce the flickering.
+
+### 0.0.7
+
+Remove (unused) textual import.
+
+### 0.0.8
+
+Add a status column for each entry.
