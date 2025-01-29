@@ -85,3 +85,7 @@ This update simplifies quite a few things. Instead of brute-forcing the colors, 
 The queue setup was replaced with a ThreadPoolExecutor that seems to work just as well. This also better supports error handling, and just gets the IP addresses once per startup and pings by ip instead of by hostname. This also allows for appending custom domains to the hostnames either via environment variable, or by adding --domain example.local, each domain will be tried in order, and the first to resolve will be used (including no domain.)
 
 This also fixes some setup info.
+
+### 0.0.6
+
+Set screen=True and update the refresh interval, to reduce the flickering.

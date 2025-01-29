@@ -56,7 +56,7 @@ def get_color(value, minLatency, maxLatency):
     return f"rgb({r},{g},{b})"
 
 
-def ping_device(name, host, maxLatency, interval):
+def ping_device(name, host, maxLatency, interval, ping_width):
     # threading.Timer(interval=interval, function=ping_device, args=[host, maxLatency, interval]).start()
     error = ""
     try:
@@ -86,11 +86,11 @@ def ping_device(name, host, maxLatency, interval):
     return name, latency, error
 
 
-def generate_table(minLatency, maxLatency) -> Table:
+def generate_table(minLatency, maxLatency, name_width, ping_width) -> Table:
     global hosts
     table = Table()
-    table.add_column("Hostname/IP")
-    table.add_column("Ping Status", justify="right", width=50, no_wrap=True)
+    table.add_column("Hostname/IP", width=name_width)
+    table.add_column("Ping Status", justify="right", width=ping_width+2, no_wrap=True)
     table.add_column("Error")
 
     for name, h in hosts.items():
@@ -100,7 +100,7 @@ def generate_table(minLatency, maxLatency) -> Table:
                 text.append("|", style=get_color(ping, minLatency, maxLatency))
             else:
                 text.append("!", style="rgb(255,51,51)")
-        table.add_row(name, text, h["error"])
+        table.add_row(name, text[-ping_width:], h["error"])
     return table
 
 
@@ -147,6 +147,12 @@ def main():
         action="append",
     )
     parser.add_argument(
+        "--history",
+        help="The number of pings to keep in history.",
+        default=50,
+        type=int,
+    )
+    parser.add_argument(
         "hosts", help="Hostnames to ping.", type=str, nargs=argparse.REMAINDER
     )
     args = vars(parser.parse_args())
@@ -155,8 +161,11 @@ def main():
         domains = os.getenv("PNG_APPEND_DOMAINS", "").split(",")
     else:
         domains = args["domain"]
+    name_width = 0
     for h in args["hosts"]:
         if h not in hosts:
+            if len(h) > name_width:
+                name_width = len(h)
             if h[:1] == "/":
                 hosts[h] = {"addr": "/", "pings": list(), "error": "", "last_start": 0}
             else:
@@ -166,11 +175,11 @@ def main():
                     "error": "",
                     "last_start": 0,
                 }
-    table = generate_table(args["minLatency"], args["maxLatency"])
+    table = generate_table(args["minLatency"], args["maxLatency"], name_width, ping_width=args["history"])
     active_futures = list()
     exe = ThreadPoolExecutor(max_workers=50)
-
-    with Live(table, refresh_per_second=4) as live:
+    last_refresh = 0
+    with Live(table, refresh_per_second=0.0001, screen=True) as live:
         while True:
             for host, h in hosts.items():
                 if (
@@ -185,6 +194,7 @@ def main():
                             h["addr"],
                             args["maxLatency"],
                             args["interval"],
+                            args["history"],
                         )
                     )
             for future in active_futures:
@@ -204,8 +214,12 @@ def main():
                     active_futures.remove(future)
             try:
                 time.sleep(0.1)
-                table = generate_table(args["minLatency"], args["maxLatency"])
+                table = generate_table(args["minLatency"], args["maxLatency"], name_width, ping_width=args["history"]+2)
                 live.update(table)
+                # time.sleep(0.01)
+                if time.time() - last_refresh > 0.5:
+                    live.refresh()
+                    last_refresh = time.time()
             except KeyboardInterrupt:
                 sys.exit(0)
 
